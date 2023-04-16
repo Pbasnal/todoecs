@@ -24,7 +24,7 @@ public class TodoTasksOopController : ControllerBase
 
         _logger.LogDebug($"Requesting OOP for > page: {page} count: {numberOfElements}");
 
-        using (TodoMetrics.MethodMetrics("OopTodoAPI"))
+        // using (TodoMetrics.MethodMetrics("OopTodoAPI"))
         {
             return todoTasksService.GetTasks(page, numberOfElements);
         }

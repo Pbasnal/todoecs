@@ -5,5 +5,6 @@ namespace TodoApp
         public int ComponentTypeId() => ComponentType.QUICK_VIEW_REMINDER;
 
         public string[] taskReminder;
+        public bool IsSet { get; set; }
     }
 }

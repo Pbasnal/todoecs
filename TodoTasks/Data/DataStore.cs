@@ -1,10 +1,18 @@
+using todorest;
+
 namespace TodoApp
 {
+    /*
+    * * A simple class to emulate data storage. It contains data in arrays since that can help in 
+    * * DOD based programming.
+    ! * We are using array of strings. However, since strings are reference types, they will be 
+    ! * allocated on the heap at random locations reducing the effects of our optimisation.
+    */
     public class DataStore
     {
-        private SortedDictionary<int, string> taskTitles;
-        private SortedDictionary<int, TaskEstimateData> taskEstimates;
-        private SortedDictionary<int, string> taskReminders;
+        private readonly string[] taskTitles;
+        private readonly TaskEstimateData[] taskEstimates;
+        private readonly string[] taskReminders;
 
         private static DataStore dataStore;
 
@@ -28,62 +36,60 @@ namespace TodoApp
 
         private DataStore(int numberOfTasks)
         {
-            taskTitles = new SortedDictionary<int, string>();
-            taskEstimates = new SortedDictionary<int, TaskEstimateData>();
-            taskReminders = new SortedDictionary<int, string>();
+            taskTitles = new string[numberOfTasks];
+            taskEstimates = new TaskEstimateData[numberOfTasks];
+            // taskReminders = new string[numberOfTasks];
 
+            // In real scenario, we would want to use insertion sort to load the data.
+            var taskArray = new TaskEstimateData[numberOfTasks];
             for (int i = 0; i < numberOfTasks; i++)
             {
-                taskTitles.Add(i, "task-" + i);
-                taskEstimates.Add(i, new TaskEstimateData
-                {
-                    initialEstimate = DateTime.Now.ToLongDateString(),
-                    completedOn = DateTime.Now.AddDays(12).ToLongDateString()
-                });
-                taskReminders.Add(i, DateTime.Now.AddDays(6).ToLongDateString());
+                taskTitles[i] = "task-" + i;
+                SetTaskEstimateData(ref taskArray[i]);
+                // taskReminders[i] = DateTime.Now.AddDays(6).ToLongDateString();
             }
         }
 
-        public Dictionary<int, string> GetTaskTitles(
+        private static void SetTaskEstimateData(ref TaskEstimateData taskEstimate)
+        {
+            taskEstimate.initialEstimate = DateTime.Now.ToLongDateString();
+            taskEstimate.completedOn = DateTime.Now.AddDays(12).
+                            ToLongDateString();
+        }
+
+        public Memory<string> GetTaskTitles(
             int index,
             int count)
         {
-            var titles = new Dictionary<int, string>();
-
-            for (int i = index; i < count; i++)
-            {
-                titles.Add(i, taskTitles[i]);
-            }
-
-            return titles;
+            return new Memory<string>(taskTitles, index, count);
         }
 
-        public Dictionary<int, TaskEstimateData> GetTaskEstimates(
-            int index,
-            int count)
-        {
-            var estimates = new Dictionary<int, TaskEstimateData>();
+        // public Dictionary<int, TaskEstimateData> GetTaskEstimates(
+        //     int index,
+        //     int count)
+        // {
+        //     var estimates = new Dictionary<int, TaskEstimateData>();
 
-            for (int i = index; i < count; i++)
-            {
-                estimates.Add(i, taskEstimates[i]);
-            }
+        //     for (int i = index; i < count; i++)
+        //     {
+        //         estimates.Add(i, taskEstimates[i]);
+        //     }
 
-            return estimates;
-        }
+        //     return estimates;
+        // }
 
-        public Dictionary<int, string> GetTaskReminders(
-            int index,
-            int count)
-        {
-            var reminders = new Dictionary<int, string>();
+        // public Dictionary<int, string> GetTaskReminders(
+        //     int index,
+        //     int count)
+        // {
+        //     var reminders = new Dictionary<int, string>();
 
-            for (int i = index; i < count; i++)
-            {
-                reminders.Add(i, taskReminders[i]);
-            }
+        //     for (int i = index; i < count; i++)
+        //     {
+        //         reminders.Add(i, taskReminders[i]);
+        //     }
 
-            return reminders;
-        }
+        //     return reminders;
+        // }
     }
 }
