@@ -1,3 +1,5 @@
+using todorest;
+
 namespace TodoApp
 {
     public struct TaskQuickViewResponseComponent : IComponent
@@ -5,6 +7,8 @@ namespace TodoApp
         public int ComponentTypeId() => ComponentType.QUICK_VIEW_RESPONSE;
 
         public TaskQuickViewCard[] taskQuickViewCards;
+
+        public bool IsSet { get; set; }
 
     }
 

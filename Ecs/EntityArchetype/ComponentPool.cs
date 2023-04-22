@@ -1,10 +1,23 @@
-using Prometheus;
-
 namespace TodoApp
 {
+    /*
+    * * ComponentPool is created for each type of component. It holds the list of all
+    * * components of one type together and manages them.
+    * * The below implementation creates multiple arrays of size 'poolUnitSize'. This 
+    * * adds flexibility of increasing and decreasing the pool size as per requirement.
+    * * 
+    * * Since components are value types. They are passed by value as method arguments
+    * * and as method return values. This basicaly means every time a component crosses 
+    * * method scope, a copy of the component is created. This can cause huge performance
+    * * and memory overhead. It has another side effect that any updates made to the 
+    * * component by systems will not get reflected.
+    * * 
+    * * To resolve above mentioned problem, the implementation passes components with the
+    * * 'ref' keyword. This allows us to pass reference of the component instead of 
+    * * passing a copy.
+    */
     public interface IComponentPool
     {
-        // void Initialise(int numberOfElements);
         bool IsEmpty();
     }
 
@@ -15,19 +28,17 @@ namespace TodoApp
 
         private Dictionary<int, T[]> componentPool;
 
-        private static readonly Counter componentCount = Metrics
-                .CreateCounter("component_count", "Number of components.",
-                labelNames: new[] { "component" });
-
         public bool IsEmpty() => componentPool.Count * poolUnitSize == 0;
 
-        public ComponentPool()
+        public ComponentPool(int initialNumberOfComponents)
         {
-            componentPool = new Dictionary<int, T[]>
+            componentPool = new Dictionary<int, T[]>();
+            int numberOfPools = initialNumberOfComponents / poolUnitSize;
+
+            for (int i = 0; i < numberOfPools; i++)
             {
-                { 0, new T[poolUnitSize] }
-            };
-            componentCount.WithLabels(typeof(T).Name).Inc(poolUnitSize);
+                componentPool.Add(i, new T[poolUnitSize]);
+            }
         }
 
         public ref T GetElementAt(int index)
@@ -38,10 +49,11 @@ namespace TodoApp
             if (!componentPool.ContainsKey(currentPoolKey))
             {
                 componentPool.Add(currentPoolKey, new T[poolUnitSize]);
-                componentCount.Inc(poolUnitSize);
             }
 
-            return ref componentPool[currentPoolKey][elementIndex];
+            ref var component = ref componentPool[currentPoolKey][elementIndex];
+            component.IsSet = false;
+            return ref component;
         }
 
         public void UpdateComponent(int index, T component)

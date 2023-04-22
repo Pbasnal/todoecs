@@ -8,5 +8,6 @@ namespace TodoApp
         public string[] taskTitle;
         public TaskEstimates[] taskEstimates;
         public string[] taskReminder;
+        public bool IsSet { get; set; }
     }
 }

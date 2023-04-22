@@ -6,5 +6,6 @@ namespace TodoApp
 
         public string initialEstimate;
         public string completedOn;
+        public bool IsSet { get; set; }
     }
 }

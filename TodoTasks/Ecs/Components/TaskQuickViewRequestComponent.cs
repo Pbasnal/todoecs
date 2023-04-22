@@ -6,5 +6,7 @@ namespace TodoApp
 
         public int page;
         public int numberOfTasks;
+
+        public bool IsSet { get; set; }
     }
 }

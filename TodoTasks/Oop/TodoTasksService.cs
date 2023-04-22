@@ -17,7 +17,7 @@ namespace todorest
         {
             var tasks = new List<TodoTask>();
 
-            Dictionary<int, string> taskTitles;
+            Memory<string> taskTitles;
             using (TodoMetrics.MethodMetrics("OopDataRead"))
             {
                 taskTitles = dataStore.GetTaskTitles(page, count);
@@ -25,7 +25,7 @@ namespace todorest
 
             using (TodoMetrics.MethodMetrics("OopBuildingResponse"))
             {
-                foreach (var taskTitle in taskTitles.Values)
+                foreach (var taskTitle in taskTitles.Span)
                 {
                     tasks.Add(new TodoTask
                     {
