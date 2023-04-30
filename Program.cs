@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Http.Json;
-using Newtonsoft.Json.Converters;
 using Prometheus;
+
+using SpanJson.AspNetCore.Formatter;
 
 // This does the conversion of dotnet event counters + net6 meter metrics into prometheus format
 var eventCounterRegistration = EventCounterAdapter.StartListening();
@@ -10,12 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers()
-    .AddNewtonsoftJson(jsonOptions =>
-    {
-        jsonOptions.SerializerSettings
-        .Converters.Add(new StringEnumConverter());
-    });
+builder.Services.AddControllers().AddSpanJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
