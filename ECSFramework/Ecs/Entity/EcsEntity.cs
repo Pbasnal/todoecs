@@ -1,17 +1,13 @@
-using ECSFramework;
+﻿namespace ECSFramework;
 
-namespace TodoApp;
-
-public struct TaskEntity : IEntity
+public struct EcsEntity : IEntity
 {
     public int Id { get; set; }
-
     public int[] components;
 
-    public TaskEntity()
+    public void Init()
     {
-        Id = 0;
-        components = new int[6]; // 6 is the number of component types we have
+        components = new int[ComponentType.Length]; 
         for (int i = 0; i < components.Length; i++)
         {
             components[i] = -1;
@@ -24,7 +20,8 @@ public struct TaskEntity : IEntity
     }
 
     public int GetComponentId(int componentType)
-    { 
+    {
         return components[componentType];
     }
+
 }

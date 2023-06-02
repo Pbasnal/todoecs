@@ -1,3 +1,5 @@
+using ECSFramework;
+
 namespace TodoApp
 {
     /*
@@ -8,21 +10,38 @@ namespace TodoApp
     * *
     * * Suffice to say that this is where we connect our lego pieces and build a feature.
     */
-    public class TaskEntityArchetype : EntityArchetype<TaskEntity>
+    public class TaskEntityArchetype : AnEntityArchetype<TaskEntity>
     {
+        private ComponentPoolDod<TaskQuickViewRequestComponent> requestComponents;
+        private ComponentPoolDod<TaskQuickViewTitles> titlesComponents;
+        private ComponentPoolDod<TaskQuickViewResponseComponent> responseComponents;
+
         public TaskEntityArchetype(int initialNumberOfEntities) :
             base(initialNumberOfEntities)
-        {}
+        {
+            requestComponents = new ComponentPoolDod<TaskQuickViewRequestComponent>();
+            titlesComponents = new ComponentPoolDod<TaskQuickViewTitles>();
+            responseComponents = new ComponentPoolDod<TaskQuickViewResponseComponent>();
+
+            RegisterComponentPool(ComponentType.QUICK_VIEW_REQUEST, requestComponents);
+            RegisterComponentPool(ComponentType.QUICK_VIEW_TASK_TITLES, titlesComponents);
+            RegisterComponentPool(ComponentType.QUICK_VIEW_RESPONSE, responseComponents);
+        }
 
         public TaskEntity BuildQuickViewEntity(int page, int numberOfTasks)
         {
-            var entity = CreateEntity();
-            ref var requestComponent = ref CreateComponentOfEntity<TaskQuickViewRequestComponent>(entity);
+            ref var entity = ref CreateEntity();
+
+            ref var requestComponent = ref requestComponents.GetFreeObject();
             requestComponent.page = page;
             requestComponent.numberOfTasks = numberOfTasks;
 
-            CreateComponentOfEntity<TaskQuickViewTitles>(entity);
-            CreateComponentOfEntity<TaskQuickViewResponseComponent>(entity);
+            ref var titleComponent = ref titlesComponents.GetFreeObject();
+            //viewComponent.taskTitle = new string[numberOfTasks];
+
+            ref var responseComponent = ref responseComponents.GetFreeObject();
+            responseComponent.taskQuickViewCards = new TaskQuickViewCard[numberOfTasks];
+
             return entity;
         }
 

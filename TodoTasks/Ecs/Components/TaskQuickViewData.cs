@@ -1,3 +1,5 @@
+using ECSFramework;
+
 namespace TodoApp
 {
     public struct TaskQuickViewData : IComponent
@@ -9,5 +11,6 @@ namespace TodoApp
         public TaskEstimates[] taskEstimates;
         public string[] taskReminder;
         public bool IsSet { get; set; }
+        public int Id { get; set; }
     }
 }

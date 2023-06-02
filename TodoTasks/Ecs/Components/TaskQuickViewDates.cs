@@ -1,3 +1,5 @@
+using ECSFramework;
+
 namespace TodoApp
 {
     public struct TaskQuickViewDates : IComponent
@@ -6,5 +8,6 @@ namespace TodoApp
 
         public string[] taskDate;
         public bool IsSet { get; set; }
+        public int Id { get; set; }
     }
 }

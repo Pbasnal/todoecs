@@ -1,3 +1,5 @@
+using ECSFramework;
+
 using todorest;
 
 namespace TodoApp
@@ -7,7 +9,7 @@ namespace TodoApp
         public int ComponentTypeId() => ComponentType.QUICK_VIEW_RESPONSE;
 
         public TaskQuickViewCard[] taskQuickViewCards;
-
+        public int Id { get; set; }
         public bool IsSet { get; set; }
 
     }

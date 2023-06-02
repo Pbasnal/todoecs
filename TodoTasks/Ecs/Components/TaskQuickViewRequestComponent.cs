@@ -1,3 +1,5 @@
+using ECSFramework;
+
 namespace TodoApp
 {
     public struct TaskQuickViewRequestComponent : IComponent
@@ -6,7 +8,7 @@ namespace TodoApp
 
         public int page;
         public int numberOfTasks;
-
+        public int Id { get; set; }
         public bool IsSet { get; set; }
     }
 }

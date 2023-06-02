@@ -12,7 +12,7 @@ export const options = {
 };
 
 export default function () {
-  http.get('https://localhost:7158/TodoTasks');
-  // http.get('https://localhost:7158/TodoTasksOop');
+  //http.get('https://localhost:7158/TodoTasks');
+  http.get('https://localhost:7158/TodoTasksOop');
   sleep(1);
 }

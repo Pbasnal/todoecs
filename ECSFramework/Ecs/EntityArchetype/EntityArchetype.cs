@@ -1,0 +1,185 @@
+using System.Collections.Concurrent;
+
+/*
+* * An Archetype is a specific set of components that are applicable for an entity. For example, to present a 
+* * simplified view of a task we only need to show it's title and isDone field but for a complete view of Task,
+* * we would need more components such as estimatedData, desciption, reminders etc. Each combination is an Archetype.
+* * 
+* * Archetype are generally very complicated to implement because we have to handle entities that can change their
+* * archetype. But for a APIs, we don't need that funcationality. We only need the logical encapsulation of a set
+* * of components.
+*/
+namespace ECSFramework;
+
+public abstract class AnEntityArchetype<E>
+    where E : struct, IEntity
+{
+    /*
+    * * This code is using object pooling pattern to reuse entities which have been processed
+    * * already. We are also using ConcurrentDictionary to maintain consisteny and integrity 
+    * * of the data. Since 1000s of requests will be creating entities in parallel, we need
+    * * concurrency management.
+    * *
+    * * We store all entities in a queue first. When a request for an entity comes, if the queue
+    * * has entities, we dequeue one entity and insert it in the dictionary. Dictionary contains 
+    * * all the active entities. 
+    * * If queue is empty, then we create a new entity.
+    * * 
+    * * Future plan is to abstract object pooling into a separate module and use it for all most 
+    * * of the data objects that we need.
+    */
+    protected ComponentPoolDod<E> entities;
+    private ComponentPoolDod<BufferedEntityComponent> bufferedEntityPool;
+    //private Dictionary<int, IComponentPool> componentPools;
+
+
+    public AnEntityArchetype(int initialNumberOfEntities)
+    {
+        entities = new ComponentPoolDod<E>(initialNumberOfEntities);
+        bufferedEntityPool = new ComponentPoolDod<BufferedEntityComponent>(initialNumberOfEntities);
+        //componentPools = new Dictionary<int, IComponentPool>();
+    }
+
+    public ref E CreateEntity()
+    {
+        ref var entity = ref entities.GetFreeObject();
+        entity.Init();
+        return ref entity;
+    }
+
+    public void FreeEntity(int entityId)
+    {
+        ref var entity = ref entities.GetObjectWithId(entityId);
+
+        FreeComponentsOfEntity(ref entity);
+
+        var componentId = entity.GetComponentId(ComponentType.BUFFERED_ENTITY_COMPONENT);
+        bufferedEntityPool.ReturnObjectWithId(componentId);
+
+        entities.ReturnObjectWithId(entityId);
+    }
+
+    public Span<E> GetActiveEntities()
+    {
+        return entities.GetSpanOfActiveObjects();
+    }
+
+    public void StartSystems(CancellationToken token)
+    {
+        var systems = GetSystems();
+
+        while (!token.IsCancellationRequested
+            || entities.Length > 0)
+        {
+            foreach (var system in systems)
+            {
+                system.Execute(this, token);
+            }
+
+            BufferedEntitySystem();
+        }
+
+        Console.WriteLine("Terminating system execution");
+    }
+
+    public async Task StartSystemsAsync(CancellationToken token)
+    {
+        var systems = GetSystems();
+
+        var batchSize = 2;
+
+        await Task.Run(() =>
+        {
+            //int i = 0;
+            while (!token.IsCancellationRequested
+                && entities.Length > 0)
+            {
+                BufferedEntitySystem();
+                var tasks = new HashSet<Task>();
+                Console.WriteLine($"Starting system executions for {entities.Length} entities");
+                for (int start = 0; start < entities.Length; start += batchSize)
+                {
+                    var end = Math.Min(entities.Length, start + batchSize);
+                    tasks.Add(StartTask(systems, start, end, token));
+                }
+
+                Task.WhenAll(tasks).Wait();
+                break;
+            }
+        }, token);
+
+        Console.WriteLine("Terminating system execution");
+    }
+
+    private Task StartTask(ISystem<E>[] systems,
+        int start, 
+        int end, 
+        CancellationToken token)
+    {
+        return Task.Factory.StartNew(() =>
+        {
+            Console.WriteLine($"start: {start} - end: {end}");
+            foreach (var system in systems)
+            {
+                try
+                {
+                    Console.WriteLine($"\t system: {system.Name} start: {start} - end: {end}");
+                    system.ExecuteBatch(this, start, end, token);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"\t Exception occurred in {system.Name} start: {start} - end: {end}");
+                    Console.WriteLine(ex);
+                }
+            }
+        }, token);
+    }
+
+    public ref E BuildEntity()
+    {
+        ref var entity = ref CreateEntity();
+        //AddComponentsToEntity(entity);
+
+        ref var bufferedEntity = ref bufferedEntityPool.GetFreeObject();
+        bufferedEntity.EntityId = entity.Id;
+        entity.SetComponent(bufferedEntity.ComponentTypeId(), bufferedEntity.Id);
+
+        return ref entity;
+    }
+
+    private void BufferedEntitySystem()
+    {
+        Console.WriteLine($"Executing buffer system to add components");
+        var activeEntitySpan = bufferedEntityPool.GetSpanOfActiveObjects();
+        var entitySpan = entities.GetSpanOfActiveObjects();
+
+        for (int i = 0; i < activeEntitySpan.Length; i++)
+        {
+            ref var bufferedEntity = ref activeEntitySpan[i];
+
+            if (bufferedEntity.IsSet) continue;
+
+            ref var entity = ref entitySpan[bufferedEntity.EntityId];
+
+            AddComponentsToEntity(ref entity);
+
+            bufferedEntity.IsSet = true;
+        }
+    }
+
+    internal abstract void AddComponentsToEntity(ref E entity);
+
+    public abstract TC GetComponentPool<TC>(int componentType) where TC : IComponentPool;
+
+    protected abstract void FreeComponentsOfEntity(ref E entity);
+
+    protected abstract ISystem<E>[] GetSystems();
+    //{
+    //    if (!componentPools.ContainsKey(componentType))
+    //    {
+    //        return null;
+    //    }
+
+    //    return componentPools[componentType];
+    //}
+}

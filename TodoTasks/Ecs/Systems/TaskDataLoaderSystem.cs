@@ -1,63 +1,69 @@
+using ECSFramework;
+
 using Prometheus;
+
 using todorest;
 
 namespace TodoApp
 {
     public class TaskDataLoaderSystem : ISystem<TaskEntity>
     {
+        public string Name => "TaskDataLoaderSystem";
+
         private DataStore dataStore;
+
 
         private static readonly Counter entityLoadCount = Metrics
             .CreateCounter("entity_loaded_count", "Number of entities loaded by data loader.");
-
+        
         public TaskDataLoaderSystem()
         {
             dataStore = DataStore.GetDataStore(1000);
         }
 
-        public void Execute(EntityArchetype<TaskEntity> entityArchetype)
+        public void Execute(AnEntityArchetype<TaskEntity> entityArchetype)
         {
             using (TodoMetrics.MethodMetrics("TaskDataLoaderSystem"))
             {
-                var requestPool = entityArchetype.GetComponentPool<TaskQuickViewRequestComponent>();
-                var batchedRequest = GetBatchesToFetch(entityArchetype, requestPool);
+                var requestPool = ((ComponentPoolDod<TaskQuickViewRequestComponent>)entityArchetype
+                                    .GetComponentPool(ComponentType.QUICK_VIEW_REQUEST))
+                                    .GetSpanOfActiveObjects();
+                var quickViewTitlesPool = ((ComponentPoolDod<TaskQuickViewTitles>)entityArchetype
+                                    .GetComponentPool(ComponentType.QUICK_VIEW_TASK_TITLES))
+                                    .GetSpanOfActiveObjects();
+
+                var batchedRequest = GetBatchesToFetch(ref requestPool);
 
                 var taskTitlesBatches = GetTaskTitles(batchedRequest);
 
-                SetResponses(entityArchetype, taskTitlesBatches);
+                SetResponses(ref requestPool, ref quickViewTitlesPool, taskTitlesBatches);
             }
         }
 
-        private Dictionary<int, int> SetResponses(
-            EntityArchetype<TaskEntity> entityArchetype,
-            Dictionary<int, Memory<string>> responseBatches)
+        private Dictionary<int, int> GetBatchesToFetch(
+            ref Span<TaskQuickViewRequestComponent> activeRequests)
         {
-            var requestPool = entityArchetype.GetComponentPool<TaskQuickViewRequestComponent>();
-            var quickViewTitlesPool = entityArchetype.GetComponentPool<TaskQuickViewTitles>();
+            //var batchedRequests = new ComponentPoolDod<TaskQuickViewRequestComponent>(requestPool.Length);
 
             var batchedRequests = new Dictionary<int, int>();
-            foreach (var entity in entityArchetype.GetActiveEntities())
+
+            for (int i = 0; i < activeRequests.Length; i++)
             {
-                ref var quickViewTitle = ref quickViewTitlesPool.GetElementAt(entity.Index);
-                if (quickViewTitle.IsSet) continue;
+                ref var request = ref activeRequests[i];
 
-                ref var request = ref requestPool.GetElementAt(entity.Index);
-
-                quickViewTitle.taskTitle = new string[request.numberOfTasks];
-                if (!responseBatches.ContainsKey(request.page)) continue;
-
-                var titles = responseBatches[request.page];
-                for (int i = 0; i < quickViewTitle.taskTitle.Length && i < titles.Length; i++)
+                var numberOfTasks = request.numberOfTasks;
+                if (batchedRequests.ContainsKey(request.page))
                 {
-                    quickViewTitle.taskTitle[i] = titles.Span[i];
+                    batchedRequests[request.page] = Math.Max(numberOfTasks, batchedRequests[request.page]);
                 }
-
-                quickViewTitle.IsSet = true;
+                else
+                {
+                    batchedRequests.Add(request.page, numberOfTasks);
+                }
             }
 
             return batchedRequests;
         }
-
 
         private Dictionary<int, Memory<string>> GetTaskTitles(Dictionary<int, int> requestBatches)
         {
@@ -72,36 +78,37 @@ namespace TodoApp
             return responseTitles;
         }
 
-        private Dictionary<int, int> GetBatchesToFetch(
-            EntityArchetype<TaskEntity> entityArchetype,
-            ComponentPool<TaskQuickViewRequestComponent> requestPool)
+        private void SetResponses(
+            ref Span<TaskQuickViewRequestComponent> requestSpan,
+            ref Span<TaskQuickViewTitles> titleSpan,
+            Dictionary<int, Memory<string>> responseBatches)
         {
-            int numberOfEntitiesProcessed = 0;
-            var batchedRequests = new Dictionary<int, int>();
-            foreach (var entity in entityArchetype.GetActiveEntities())
+            int rangeOfIteration = Math.Min(requestSpan.Length, titleSpan.Length);
+            for (int i = 0; i < rangeOfIteration; i++)
             {
-                numberOfEntitiesProcessed++;
-                ref var request = ref requestPool.GetElementAt(entity.Index);
+                ref var quickViewTitle = ref titleSpan[i];
+                ref var request = ref requestSpan[i];
 
-                if(request.IsSet) continue;
+                if (quickViewTitle.IsSet
+                    || request.IsSet
+                    || !responseBatches.ContainsKey(request.page))
+                    continue;
 
-                var valueToAdd = request.numberOfTasks;
-                if (batchedRequests.ContainsKey(request.page))
-                {
-                    valueToAdd = valueToAdd > batchedRequests[request.page] ?
-                        valueToAdd : batchedRequests[request.page];
+                quickViewTitle.taskTitle = responseBatches[request.page];
 
-                    batchedRequests[request.page] = valueToAdd;
-                }
-                else
-                {
-                    batchedRequests.Add(request.page, valueToAdd);
-                }
+                quickViewTitle.IsSet = true;
                 request.IsSet = true;
             }
-            entityLoadCount.Inc(numberOfEntitiesProcessed);
+        }
 
-            return batchedRequests;
+        public void Execute(AnEntityArchetype<TaskEntity> entityArchetype, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ExecuteBatch(AnEntityArchetype<TaskEntity> entityArchetype, int start, int end, CancellationToken token)
+        {
+            throw new NotImplementedException();
         }
     }
 }
