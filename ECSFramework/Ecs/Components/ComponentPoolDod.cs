@@ -29,13 +29,13 @@ public class ComponentPoolDod<T> : IComponentPool
         }
     }
 
-    public Span<T> GetSpanOfActiveObjects()
+    public Memory<T> GetActiveObjects()
     {
         if (lastInUseObject == -1)
         {
-            return Span<T>.Empty;
+            return Memory<T>.Empty;
         }
-        return objectPool.AsSpan().Slice(0, lastInUseObject + 1);
+        return objectPool.AsMemory().Slice(0, lastInUseObject + 1);
     }
 
     public ref T GetFreeObject()

@@ -5,6 +5,8 @@ public struct HelloWorldMessageComponent : IComponent
     public bool IsSet { get; set; }
     public int Id { get; set; }
 
+    public int[] Nums { get; set; }
+
     public ValueString helloWorldMessage;
 
     public void Init()

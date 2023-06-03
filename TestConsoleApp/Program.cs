@@ -4,31 +4,42 @@ using ECSFramework;
 
 using ObjectPoolSystem;
 
-namespace todorest;
+namespace TestConsoleApp;
 
 public class TestConsoleApp
 {
     public static void Main()
     {
-        PerfRunEcsFramework();
+        PerfRunThreaded();
     }
 
-    public static void PerfRunEcsFramework()
+    public static void PerfRunThreaded()
     {
-        var tknSource = new CancellationTokenSource();
-        var archetype = new TestArchetype(100);
+        BenchmarkRunner.Run<PerfRunBatchedSystems>();
 
-        for (int i = 0; i < 10; i++)
-        {
-            archetype.BuildEntity();
-        }        
+        //int numOfEntities = 3;
+        //int[][] arr = new int[numOfEntities][];
+        //var random = new Random();
 
-        var systemsTask = archetype.StartSystemsAsync(tknSource.Token);       
+        //var perfSystem = new PerfRunBatchedSystems();
+        //for (int i = 0; i < numOfEntities; i++)
+        //{
+        //    var startTime = DateTime.Now;
+        //    perfSystem.RunAsyncEcs();
 
-        //archetype.StartSystems(tknSource.Token).Wait();
-        systemsTask.Wait(); 
+        //    //arr[i] = new int[10000];
+        //    //for (int j = 0; j < arr[i].Length; j++)
+        //    //{
+        //    //    arr[i][j] = j;
+        //    //}
+
+        //    //SortUtils.BubbleSort(arr[i]);
+
+        //    var endTime = DateTime.Now;
+        //    Console.WriteLine($"Time taken: {(endTime - startTime).TotalMilliseconds}");
+        //}
     }
-    
+
 
     public static void PerfRunPool()
     {

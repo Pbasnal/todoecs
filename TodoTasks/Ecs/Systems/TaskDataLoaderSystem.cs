@@ -27,10 +27,10 @@ namespace TodoApp
             {
                 var requestPool = ((ComponentPoolDod<TaskQuickViewRequestComponent>)entityArchetype
                                     .GetComponentPool(ComponentType.QUICK_VIEW_REQUEST))
-                                    .GetSpanOfActiveObjects();
+                                    .GetActiveObjects();
                 var quickViewTitlesPool = ((ComponentPoolDod<TaskQuickViewTitles>)entityArchetype
                                     .GetComponentPool(ComponentType.QUICK_VIEW_TASK_TITLES))
-                                    .GetSpanOfActiveObjects();
+                                    .GetActiveObjects();
 
                 var batchedRequest = GetBatchesToFetch(ref requestPool);
 

@@ -17,8 +17,8 @@ public class PerfRunEcs
     {
         var tknSource = new CancellationTokenSource();
         var archetype = new TestArchetype(100);
-       
-        ref var entity = ref archetype.BuildEntity();
+
+        ref var entity = ref archetype.BuildEntity(10);
 
         archetype.StartSystems(tknSource.Token);
     }

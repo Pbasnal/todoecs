@@ -14,8 +14,8 @@ public class TaskHomePageResponseSystem : ISystem<TaskEntity>
         var quickViewTitlesPool = (ComponentPoolDod<TaskQuickViewTitles>)entityArchetype
             .GetComponentPool(ComponentType.QUICK_VIEW_TASK_TITLES);
 
-        var titlesSpan = quickViewTitlesPool.GetSpanOfActiveObjects();
-        var responseSpan = responsePool.GetSpanOfActiveObjects();
+        var titlesSpan = quickViewTitlesPool.GetActiveObjects();
+        var responseSpan = responsePool.GetActiveObjects();
 
         var rangeOfIteration = Math.Min(titlesSpan.Length, responseSpan.Length);
 

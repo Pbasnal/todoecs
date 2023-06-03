@@ -35,6 +35,7 @@ public struct ExpandableMemArray<T> where T : struct
     }
 
     public Span<T> AsSpan() => memoryArray.Span;
+    public Memory<T> AsMemory() => memoryArray;
 
     public Span<T> IncreaseCapacity()
     {

@@ -17,5 +17,5 @@ public interface ISystem<E>
 {
     public string Name { get; }
     public void Execute(AnEntityArchetype<E> entityArchetype, CancellationToken token);
-    public void ExecuteBatch(AnEntityArchetype<E> entityArchetype, int start, int end, CancellationToken token);
+    public void ExecuteBatch(AnEntityArchetype<E> entityArchetype, int batchSize, CancellationToken token);
 }

@@ -11,29 +11,29 @@ public class TestArchetype : AnEntityArchetype<EcsEntity>
         };
     }
 
-    public override TC GetComponentPool<TC>(int componentType)
+    public override ComponentPoolDod<TC> GetComponentPool<TC>(int componentType)
     {
         return componentType switch
         {
-            ComponentType.HELLO_WORLD_COMPONENT => (TC)componentPools[0],
-            _ => (TC)componentPools[0],
+            ComponentType.HELLO_WORLD_COMPONENT => (ComponentPoolDod<TC>)componentPools[0],
+            _ => (ComponentPoolDod<TC>)componentPools[0],
         };
     }
 
-    internal override void AddComponentsToEntity(ref EcsEntity entity)
+    internal override void AddComponentsToEntity(ref EcsEntity entity, int requestData)
     {
         var dataComponentPool = (ComponentPoolDod<HelloWorldMessageComponent>)componentPools[0];
         ref var helloWorldMessageComponent = ref dataComponentPool.GetFreeObject();
         helloWorldMessageComponent.Init();
+        helloWorldMessageComponent.Nums = new int[requestData];
         entity.SetComponent(helloWorldMessageComponent.ComponentTypeId(), helloWorldMessageComponent.Id);
     }
 
     protected override ISystem<EcsEntity>[] GetSystems()
     {
         return new ISystem<EcsEntity>[] {
-            new MessageSetterSystem(),
-            new MessageConsolePrintSystem(),
-            new FinaliseEntitySystem()
+            new SortSetterSystem(),
+            new SortSystem()
         };
     }
 
@@ -45,30 +45,3 @@ public class TestArchetype : AnEntityArchetype<EcsEntity>
         dataComponentPool.ReturnObjectWithId(componentId);
     }
 }
-
-
-//public struct TestEntity : IEntity
-//{
-//    public int Id { get; set; }
-//    public int[] components;
-
-//    public TestEntity()
-//    {
-//        Id = 0;
-//        components = new int[6]; // 6 is the number of component types we have
-//        for (int i = 0; i < components.Length; i++)
-//        {
-//            components[i] = -1;
-//        }
-//    }
-
-//    public void SetComponent(int componentType, int componentId)
-//    {
-//        components[componentType] = componentId;
-//    }
-
-//    public int GetComponentId(int componentType)
-//    {
-//        return components[componentType];
-//    }
-//}
