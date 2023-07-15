@@ -10,7 +10,8 @@ public class TestConsoleApp
 {
     public static void Main()
     {
-        PerfRunThreaded();
+        //PerfRunThreaded();
+        PerfRunPool();
     }
 
     public static void PerfRunThreaded()
