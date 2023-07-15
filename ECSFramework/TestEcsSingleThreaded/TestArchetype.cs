@@ -1,47 +1,56 @@
 ﻿namespace ECSFramework;
 
-public class TestArchetype : AnEntityArchetype<EcsEntity>
+public class TestArchetype : AnEntityArchetype<EntityInitializerComponent, EntityFinalizerComponent>
 {
-    private IComponentPool[] componentPools;
-
     public TestArchetype(int initialNumberOfEntities) : base(initialNumberOfEntities)
+    { }
+
+    internal override IList<IComponentPool> GetAllComponentPools(int initialNumberOfEntities)
     {
-        componentPools = new IComponentPool[] {
+        return new List<IComponentPool> {
             new ComponentPoolDod<HelloWorldMessageComponent>(initialNumberOfEntities)
         };
     }
 
-    public override ComponentPoolDod<TC> GetComponentPool<TC>(int componentType)
+    internal override void AddComponentsToEntity(ref EcsEntity entity, ref EntityInitializerComponent requestData)
     {
-        return componentType switch
-        {
-            ComponentType.HELLO_WORLD_COMPONENT => (ComponentPoolDod<TC>)componentPools[0],
-            _ => (ComponentPoolDod<TC>)componentPools[0],
-        };
-    }
-
-    internal override void AddComponentsToEntity(ref EcsEntity entity, int requestData)
-    {
-        var dataComponentPool = (ComponentPoolDod<HelloWorldMessageComponent>)componentPools[0];
+        var dataComponentPool = GetComponentPool<HelloWorldMessageComponent>();
         ref var helloWorldMessageComponent = ref dataComponentPool.GetFreeObject();
-        helloWorldMessageComponent.Init();
-        helloWorldMessageComponent.Nums = new int[requestData];
-        entity.SetComponent(helloWorldMessageComponent.ComponentTypeId(), helloWorldMessageComponent.Id);
+        helloWorldMessageComponent.Init(requestData.LengthToArrayToSort);
+        helloWorldMessageComponent.EntityId = entity.Id;
+        entity.MapComponentToEntity(helloWorldMessageComponent);
     }
 
-    protected override ISystem<EcsEntity>[] GetSystems()
+    internal override List<ISystem> GetSystems()
     {
-        return new ISystem<EcsEntity>[] {
+        return new List<ISystem>{
             new SortSetterSystem(),
             new SortSystem()
         };
     }
 
-    protected override void FreeComponentsOfEntity(ref EcsEntity entity)
+    internal override void FreeComponentsOfEntity(ref EcsEntity entity)
     {
-        var dataComponentPool = (ComponentPoolDod<HelloWorldMessageComponent>)componentPools[0];
-        var componentId = entity.GetComponentId(ComponentType.HELLO_WORLD_COMPONENT);
+        var dataComponentPool = GetComponentPool<HelloWorldMessageComponent>();
+        var componentTypeId = ComponentType.GetComponentTypeId(typeof(HelloWorldMessageComponent));
+        try
+        {
+            var componentId = entity.GetComponentId(componentTypeId);
+            dataComponentPool.ReturnObjectWithId(componentId);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
 
-        dataComponentPool.ReturnObjectWithId(componentId);
+    internal override void AddComponentToEntity<C>(ref EcsEntity entity, C component)
+    {
+        var dataComponentPool = GetComponentPool<C>();
+
+        var componentTypeId = ComponentType.GetComponentTypeId(component.GetType());
+        int componentId = dataComponentPool.GetIndexOfFreeObject();
+
+        entity.MapComponentToEntity(componentTypeId, componentId);
     }
 }

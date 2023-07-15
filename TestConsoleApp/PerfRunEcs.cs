@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 
 using ECSFramework;
 
@@ -18,7 +12,10 @@ public class PerfRunEcs
         var tknSource = new CancellationTokenSource();
         var archetype = new TestArchetype(100);
 
-        ref var entity = ref archetype.BuildEntity(10);
+        var inputComponent = new EntityInitializerComponent();
+        inputComponent.LengthToArrayToSort = 10;
+
+        ref var entity = ref archetype.CreateEntity(ref inputComponent);
 
         archetype.StartSystems(tknSource.Token);
     }

@@ -39,13 +39,11 @@ public struct ExpandableMemArray<T> where T : struct
 
     public Span<T> IncreaseCapacity()
     {
-
         CopyArray();
         Length *= 2;
 
         return AsSpan();
     }
-
 
     private void CopyArray()
     {

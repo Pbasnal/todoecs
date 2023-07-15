@@ -35,7 +35,8 @@ public class ComponentPoolDod<T> : IComponentPool
         {
             return Memory<T>.Empty;
         }
-        return objectPool.AsMemory().Slice(0, lastInUseObject + 1);
+        var len = objectPool.Length <= lastInUseObject + 1 ? objectPool.Length : lastInUseObject + 1;
+        return objectPool.AsMemory().Slice(0, len);
     }
 
     public ref T GetFreeObject()
@@ -48,13 +49,25 @@ public class ComponentPoolDod<T> : IComponentPool
             Array.Resize(ref poolIndex, span.Length);
         }
 
-        lastInUseObject++;
-        ref T objectToReturn = ref span[lastInUseObject];
-        objectToReturn.Id = lastInUseObject;
+        try
+        {
+            lastInUseObject++;
+            ref T objectToReturn = ref span[lastInUseObject];
+            objectToReturn.Id = lastInUseObject;
 
-        poolIndex[lastInUseObject] = lastInUseObject;
+            poolIndex[lastInUseObject] = lastInUseObject;
+            return ref objectToReturn;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }        
+    }
 
-        return ref objectToReturn;
+
+    public int GetIndexOfFreeObject()
+    {
+        return GetFreeObject().Id;
     }
 
     public ref T GetObjectWithId(int objectId)

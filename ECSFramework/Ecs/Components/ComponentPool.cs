@@ -20,16 +20,20 @@ namespace ECSFramework
     {
         bool IsEmpty();
         void SetComponentEmpty(int index);
+        void ReturnObjectWithId(int index);
+        int GetIndexOfFreeObject();
     }
 
-    public class EmptyComponentPool : IComponentPool
-    {
-        public bool IsEmpty() => true;
+    //public class EmptyComponentPool : IComponentPool
+    //{
+    //    public bool IsEmpty() => true;
 
-        public void SetComponentEmpty(int index)
-        {
-        }
-    }
+    //    public void SetComponentEmpty(int index)
+    //    {
+    //    }
+
+    //    public void ReturnObjectWithId(int index) { }
+    //}
 
 
     //public class ComponentPool<T> : IComponentPool

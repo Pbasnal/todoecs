@@ -8,8 +8,9 @@ public struct ValueString
     private int stringLength;
     private StringBuilder stringBuilder;
 
-    public void Init (int initialSize = 50)
+    public ValueString()
     {
+        int initialSize = 50;
         chars = new char[initialSize];
         stringLength = 0;
         stringBuilder = new StringBuilder();

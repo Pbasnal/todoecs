@@ -4,17 +4,25 @@ public struct EcsEntity : IEntity
 {
     public int Id { get; set; }
     public int[] components;
+    public int ProcessedComponents { get; set; }
 
     public void Init()
     {
-        components = new int[ComponentType.Length]; 
+        ProcessedComponents = 0;
+        components = new int[ComponentType.Length];
         for (int i = 0; i < components.Length; i++)
         {
             components[i] = -1;
         }
     }
 
-    public void SetComponent(int componentType, int componentId)
+    public void MapComponentToEntity<T>(T component) where T : struct, IComponent
+    {
+        var componentTypeId = ComponentType.GetComponentTypeId(component.GetType());
+        components[componentTypeId] = component.Id;
+    }
+
+    public void MapComponentToEntity(int componentType, int componentId)
     {
         components[componentType] = componentId;
     }
@@ -23,5 +31,4 @@ public struct EcsEntity : IEntity
     {
         return components[componentType];
     }
-
 }

@@ -14,6 +14,8 @@ namespace ECSFramework;
 public interface IComponent : IValueObject
 {
     // Not exactly needed. I'm was just trying a few things.
-    public int ComponentTypeId();
-    public bool IsSet { get; set; }
+    //int ComponentTypeId();
+    bool IsSet { get; set; }
+    int EntityId { get; set; }
+    void CopyFrom(IComponent component);
 }

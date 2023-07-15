@@ -7,11 +7,11 @@ namespace TestConsoleApp;
 [MemoryDiagnoser]
 public class PerfRunBatchedSystems
 {
-    private int initialSizeOfArchetype = 100;
+    private int initialSizeOfArchetype = 50;
     private int countOfNumbersToSort = 10000;
     
-    private int numberOfEntities = 1000;
-    private int batchSize = 125;
+    private int numberOfEntities = 100;
+    private int batchSize = 50;
 
     [Benchmark]
     public void RunSyncEcs()
@@ -21,7 +21,10 @@ public class PerfRunBatchedSystems
 
         for (int i = 0; i < numberOfEntities; i++)
         {
-            archetype.BuildEntity(countOfNumbersToSort);
+            var inputComponent = new EntityInitializerComponent();
+            inputComponent.LengthToArrayToSort = countOfNumbersToSort;
+
+            archetype.CreateEntity(ref inputComponent);
         }        
 
         archetype.StartSystems(tknSource.Token);
@@ -35,7 +38,10 @@ public class PerfRunBatchedSystems
 
         for (int i = 0; i < numberOfEntities; i++)
         {
-            archetype.BuildEntity(countOfNumbersToSort);
+            var inputComponent = new EntityInitializerComponent();
+            inputComponent.LengthToArrayToSort = countOfNumbersToSort;
+
+            archetype.CreateEntity(ref inputComponent);
         }
 
         archetype.StartSystemsAsync(batchSize, tknSource.Token).Wait();

@@ -8,9 +8,9 @@ namespace ECSFramework;
 */
 public interface IEntity : IValueObject
 {
-    void Init();
+    void MapComponentToEntity<T>(T component) where T : struct, IComponent;
 
-    void SetComponent(int componentType, int componentId);
+    void MapComponentToEntity(int componentType, int componentId);
 
     int GetComponentId(int componentType);
 }

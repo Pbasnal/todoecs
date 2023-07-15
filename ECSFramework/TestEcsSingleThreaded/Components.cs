@@ -4,18 +4,27 @@ public struct HelloWorldMessageComponent : IComponent
 {
     public bool IsSet { get; set; }
     public int Id { get; set; }
+    public int EntityId { get; set; }
 
     public int[] Nums { get; set; }
 
     public ValueString helloWorldMessage;
 
-    public void Init()
+    public void Init(int sizeOfNums)
     {
-        helloWorldMessage.Init();
+        IsSet = false;
+        Nums = new int[sizeOfNums];
+        helloWorldMessage = new ValueString();
     }
 
-    public int ComponentTypeId()
+    public void CopyFrom(IComponent component)
     {
-        return ComponentType.HELLO_WORLD_COMPONENT;
+        if (component is not HelloWorldMessageComponent) return;
+
+        var helloComponent = (HelloWorldMessageComponent)component;
+        this.IsSet = helloComponent.IsSet;
+        this.EntityId = helloComponent.EntityId;
+        this.Nums = helloComponent.Nums;
+        this.helloWorldMessage = helloComponent.helloWorldMessage;
     }
 }

@@ -17,12 +17,12 @@ public class TestConsoleApp
     {
         BenchmarkRunner.Run<PerfRunBatchedSystems>();
 
-        //int numOfEntities = 3;
-        //int[][] arr = new int[numOfEntities][];
+        //int numberOfRuns = 1;
+        //int[][] arr = new int[numberOfRuns][];
         //var random = new Random();
 
         //var perfSystem = new PerfRunBatchedSystems();
-        //for (int i = 0; i < numOfEntities; i++)
+        //for (int i = 0; i < numberOfRuns; i++)
         //{
         //    var startTime = DateTime.Now;
         //    perfSystem.RunAsyncEcs();
