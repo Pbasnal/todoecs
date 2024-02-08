@@ -1,36 +1,4 @@
-
-using System.ComponentModel;
-
 namespace StartUp;
-
-public struct DocTable
-{
-    public string[] DocumentName;
-    public string[] DocumentContent;
-
-    public int NumberOfEntries;
-
-    public DocTable(int initialReservedSize)
-    {
-        DocumentName = new string[initialReservedSize];
-        DocumentContent = new string[initialReservedSize];
-
-        NumberOfEntries = 0;
-    }
-}
-
-public static class Algos
-{
-    public static bool UpdateComponent<T>(int insertAt, T componentValue, ref T[] column)
-    {
-        if(insertAt < column.Length) {
-            column[insertAt] = componentValue;
-            return true;
-        }
-        return false;
-    }
-}
-
 
 public struct DocumentTable
 {
