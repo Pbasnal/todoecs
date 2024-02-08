@@ -4,6 +4,7 @@ using ECSFramework;
 
 using ObjectPoolSystem;
 
+
 namespace TestConsoleApp;
 
 public class TestConsoleApp
