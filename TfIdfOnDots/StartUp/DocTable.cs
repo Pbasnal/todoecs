@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace StartUp;
+﻿namespace StartUp;
 
 public struct DocTable
 {
@@ -70,9 +68,44 @@ public class DocTableOps
         return 0;
     }
 
+    public bool UpdateDocument(int index, string newDocName, string documentContent)
+    {
+        if (index < docTable.DocumentName.Length)
+        {
+            docTable.DocumentName[index] = newDocName;
+            docTable.DocumentContent[index] = documentContent;
+            return true;
+        }
+        return false;
+    }
+
+    public bool RemoveDocument(int index)
+    {
+        if (index >= docTable.NumberOfEntries || index < 0) return false;
+        
+        for (int i = index; i < docTable.NumberOfEntries; i++)
+        {
+            docTable.DocumentName[i] = docTable.DocumentName[i + 1];
+        }
+        for (int i = index; i < docTable.NumberOfEntries; i++)
+        {
+            docTable.DocumentContent[index] = docTable.DocumentContent[i + 1];
+        }
+
+        docTable.NumberOfEntries--;
+        return true;
+    }
+
+    public bool IsEmpty() => docTable.NumberOfEntries == 0;
+
+    public void PrintDoc(int index)
+    {
+        Console.WriteLine($"{docTable.DocumentName[index]}: {docTable.DocumentContent[index]}");
+    }
+
     public void PrintAllDocs()
     {
-        for(int i = 0; i < docTable.NumberOfEntries; i++)
+        for (int i = 0; i < docTable.NumberOfEntries; i++)
         {
             Console.WriteLine($"{docTable.DocumentName[i]}: {docTable.DocumentContent[i]}");
         }
