@@ -1,8 +1,10 @@
+namespace StartUp;
+
 public class DocumentTableOperations
 {
-    public static void AddDocument(string documentName, string content, ref DocumentTable documentTable)
+    public static uint AddDocument(string documentName, string content, ref DocumentTable documentTable)
     {
-        documentTable.AddDocument(documentName, content);
+        return documentTable.AddDocument(documentName, content);
         // publish into the document added queue or updated queue
     }
 

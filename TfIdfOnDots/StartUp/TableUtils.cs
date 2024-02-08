@@ -1,3 +1,5 @@
+namespace StartUp;
+
 public class TableUtils
 {
     public static (bool, int) SearchInArray<T>(T[] array, ref T elementToSearch, Func<T, T, int> comparer)

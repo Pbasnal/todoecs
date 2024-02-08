@@ -1,9 +1,11 @@
-﻿namespace StartUp;
+﻿using static StartUp.TokenFrequencyTable;
+
+namespace StartUp;
 
 public class Bootstrap
 {
    public static void Main(string[] args)
-   {
+{
       DocTableTests docTableTests = new();
       docTableTests.RunTests();
    }
@@ -24,12 +26,14 @@ public class Bootstrap
       };
 
       DocumentTable documentTable = new(10);
-
+      TokenFrequencyTable tokenFrequencyTable = new(1000);
       foreach (string documentName in documents.Keys)
       {
-         DocumentTableOperations.AddDocument(documentName,
+         uint docId = DocumentTableOperations.AddDocument(documentName,
             documents[documentName],
             ref documentTable);
+
+         TokenFrequencyOperations.AddTokens(docId, documents[documentName], ref tokenFrequencyTable);
       }
 
       // reading docs
@@ -39,6 +43,18 @@ public class Bootstrap
             .ReadDocumentContent(documentName, ref documentTable);
 
          Console.WriteLine($"{documentName}: {content}");
+      }
+
+      bool readNextToken;
+      TokenId tokenId;
+      int tokenFrequency;
+      int tokenIdToRead = 0;
+      (readNextToken, tokenId, tokenFrequency) = TokenFrequencyOperations.ReadTokenFrequency(tokenIdToRead, ref tokenFrequencyTable);
+      while (readNextToken)
+      {
+         Console.WriteLine($"{tokenId.DocumentId}: {tokenId.Token} > {tokenFrequency}");
+         tokenIdToRead++;
+         (readNextToken, tokenId, tokenFrequency) = TokenFrequencyOperations.ReadTokenFrequency(tokenIdToRead, ref tokenFrequencyTable);
       }
 
       documents = new Dictionary<string, string>{
