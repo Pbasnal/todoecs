@@ -1,0 +1,1 @@
+This repo will contian my experiments with Data Oriented Design and Entity Component System written in c#.
