@@ -4,6 +4,7 @@ public struct DocTable
 {
     public string[] DocumentName;
     public string[] DocumentContent;
+    public uint[] TokenCounts;
 
     public uint NumberOfEntries;
 
@@ -11,7 +12,8 @@ public struct DocTable
     {
         DocumentName = new string[initialReservedSize];
         DocumentContent = new string[initialReservedSize];
-
+        TokenCounts = new uint[initialReservedSize];
+        
         NumberOfEntries = 0;
     }
 }
@@ -20,7 +22,7 @@ public struct DocTable
 // DocTables. But in general, could the table be static?
 public class DocTableOps
 {
-    private DocTable docTable;
+    public DocTable docTable;
 
     public DocTableOps(int initialReservedSize = 100)
     {
@@ -61,6 +63,7 @@ public class DocTableOps
         {
             docTable.DocumentName[docTable.NumberOfEntries] = docName;
             docTable.DocumentContent[docTable.NumberOfEntries] = docContent;
+            docTable.TokenCounts[docTable.NumberOfEntries] = (uint)docContent.Split(' ').Length;
 
             docTable.NumberOfEntries++;
             return docTable.NumberOfEntries - 1;
@@ -74,6 +77,8 @@ public class DocTableOps
         {
             docTable.DocumentName[index] = newDocName;
             docTable.DocumentContent[index] = documentContent;
+            docTable.TokenCounts[index] = (uint)documentContent.Split(' ').Length;
+
             return true;
         }
         return false;
@@ -82,7 +87,7 @@ public class DocTableOps
     public bool RemoveDocument(int index)
     {
         if (index >= docTable.NumberOfEntries || index < 0) return false;
-        
+
         for (int i = index; i < docTable.NumberOfEntries; i++)
         {
             docTable.DocumentName[i] = docTable.DocumentName[i + 1];
