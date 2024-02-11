@@ -101,3 +101,18 @@ public struct TfIdfTable
 This was interesting. Even though I knew there are 3 different sizes of tables, I didn't realise it fully till I wrote everything in one place.
 
 Another point: the whole system is built around documents. So if we write separate classes for these 3 different type of data, all three will have almost similar interface accepting documentId
+
+
+#### Learnings for TfIdf excercise
+1. Data and operations are not completely decoupled. The operations that we want to perform, determine the data structure that we need to use.
+2. I'm still finding my balance of pre-mature optimisation and proper data split.
+3. I'm still overcomplicating the code by making it tricky. Tf-Idf calculation should not be this hard. Granted that I was trying to build a system in which documents can be added or removed on runtime.
+4. Everything doesn't have to be a flat array. It makes sense to use multi-dimensional arrays as well at some places, hash sets, queues etc.
+5. I didn't run any benchmarks to see how the code affected the performance. I felt very confused while coding. I had no idea if I was going in the right direction or not. I just wanted to get some clarity and didn't invest in perf runs.
+6. DOD is helpful in processing large of data quickly. But the code is taking 1 document at a time. Systems should probably take an entire array as input and the Insert function should really be a merge function or InsertAll.
+7. Another important factor because of which I didn't run benchmarks is that I have used highly in-efficient algorithms for now. And the code doesn't really care about data consistency, data compaction. None of the operations which actually move elements within the array are used. Searching is done by linear search and a calculation required running multiple nested loops.
+8. So, it's better to write the whole functionality within 1 table first and then split it. That probably will help in refining the code much easily.
+
+
+
+
