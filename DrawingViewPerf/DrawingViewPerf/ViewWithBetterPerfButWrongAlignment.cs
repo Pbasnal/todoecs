@@ -49,6 +49,12 @@ public class ViewWithBetterPerfButWrongAlignment
     {
         drawingView.SizeChanged += (s, e) =>
         {
+            // Alignment issue of generated image is happening because the DrawingView library
+            // adjusts the size of the image by using line width. 
+            // Becuase if a line is drawn from (0, 0) to (0, 5) then to capture the entire line in the image
+            // the frame needs to capture from (-lineWidth, -lineWidth) to (lineWidth, 5 + lineWidth)
+            // 
+            // To solve the problem of alignment, below function adjusts the border points using the lineWidth
             InitialiseBoundaryLineWhithCausesAlignmentIssue();
             DrawBorder();
         };
